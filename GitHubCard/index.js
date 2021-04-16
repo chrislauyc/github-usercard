@@ -1,9 +1,11 @@
+import axios from 'axios';
 /*
   STEP 1: using axios, send a GET request to the following URL
     (replacing the placeholder with your Github name):
     https://api.github.com/users/<your name>
 */
-
+axios.get('https://api.github.com/users/chrislauyc')
+.then((response)=>console.log(response)).catch((err)=>console.log(err));
 /*
   STEP 2: Inspect and study the data coming back, this is YOUR
     github info! You will need to understand the structure of this
@@ -16,7 +18,9 @@
   STEP 4: Pass the data received from Github into your function,
     and append the returned markup to the DOM as a child of .cards
 */
-
+axios.get('https://api.github.com/users/chrislauyc')
+.then((response)=>document.querySelector('div.cards').appendChild(getProfile(response.data)))
+.catch((err)=>console.log(err));
 /*
   STEP 5: Now that you have your own card getting added to the DOM, either
     follow this link in your browser https://api.github.com/users/<Your github name>/followers,
@@ -29,6 +33,14 @@
 */
 
 const followersArray = [];
+axios.get('https://api.github.com/users/chrislauyc/followers')
+.then((response)=>response.data.forEach((f)=>followersArray.push(f.url)))
+.then(()=>followersArray.forEach((url)=>{
+  axios.get(url)
+  .then((response)=>document.querySelector('div.cards').appendChild(getProfile(response.data)))
+  .catch((err)=>console.log(err));
+}))
+.catch((err)=>console.log(err));
 
 /*
   STEP 3: Create a function that accepts a single object as its only argument.
@@ -49,7 +61,46 @@ const followersArray = [];
       </div>
     </div>
 */
+function getProfile(data){
+  let div = document.createElement('div');
+  let img = document.createElement('img');
+  let cardInfo = document.createElement('div');
+  let h3 = document.createElement('h3');
+  let username = document.createElement('p');
+  let location = document.createElement('p');
+  let profile = document.createElement('p');
+  let url = document.createElement('a');
+  let followers = document.createElement('p');
+  let following = document.createElement('p');
+  let bio = document.createElement('p');
 
+  div.classList.add('card');
+  img.setAttribute('src',`${data.avatar_url}`);
+  cardInfo.classList.add('card-info');
+  h3.classList.add('name');
+  h3.textContent = `${data.name}`;
+  username.classList.add('username');
+  username.textContent = `${data.login}`;
+  location.textContent = `Location: ${data.location}`;
+  profile.textContent = `Profile: `;
+  url.setAttribute('href',data.html_url);
+  url.textContent = `${data.html_url}`;
+  followers.textContent = `Followers: ${data.followers}`;
+  following.textContent = `Following: ${data.following}`;
+  bio.textContent = `Bio: ${data.bio}`;
+
+  div.appendChild(img);
+  div.appendChild(cardInfo);
+  cardInfo.appendChild(h3);
+  cardInfo.appendChild(username);
+  cardInfo.appendChild(location);
+  cardInfo.appendChild(profile);
+  cardInfo.appendChild(followers);
+  cardInfo.appendChild(following);
+  cardInfo.appendChild(bio);
+  profile.appendChild(url);
+  return div;
+};
 /*
   List of LS Instructors Github username's:
     tetondan
